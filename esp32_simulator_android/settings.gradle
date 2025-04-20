@@ -1,0 +1,2 @@
+rootProject.name = "ESP32 Simulator"
+include ':app' 

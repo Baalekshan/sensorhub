@@ -158,12 +158,18 @@ export function useDeviceOnboarding() {
       setIsScanning(true);
       setDevices([]);
 
+      console.log('Requesting Bluetooth device...');
       const device = await navigator.bluetooth.requestDevice({
         filters: [
           { services: [SERVICE_UUID] },
           { namePrefix: 'ESP32' },
         ],
         optionalServices: [SERVICE_UUID],
+      });
+      console.log('Bluetooth device obtained:', {
+        name: device.name,
+        id: device.id,
+        connected: device.gatt?.connected
       });
 
       if (device) {
@@ -177,7 +183,15 @@ export function useDeviceOnboarding() {
         setSelectedDevice(newDevice);
         
         // Add event listener for disconnection
-        device.addEventListener('gattserverdisconnected', () => {
+        console.log('Adding GATT server disconnection listener');
+        device.addEventListener('gattserverdisconnected', (event: Event) => {
+          console.log('GATT server disconnected event:', {
+            event,
+            deviceName: device.name,
+            deviceId: device.id,
+            currentStep: step
+          });
+          
           toast({
             title: 'Device Disconnected',
             description: `Lost connection to ${device.name || 'device'}`,
@@ -186,12 +200,18 @@ export function useDeviceOnboarding() {
           
           // Clean up if in onboarding process
           if (step !== 'scan') {
+            console.log('Cleaning up after disconnection in step:', step);
             disconnectDevice(false);
           }
         });
       }
     } catch (error) {
       console.error('Bluetooth scan error:', error);
+      console.error('Error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       toast({
         title: 'Scan Error',
         description: error instanceof Error ? error.message : 'Failed to scan for devices',
@@ -223,75 +243,171 @@ export function useDeviceOnboarding() {
       return;
     }
 
-    try {
-      toast({
-        title: 'Connecting',
-        description: `Connecting to ${selectedDevice.name}...`,
-      });
+    const MAX_RETRIES = 3;
+    let retryCount = 0;
 
-      const server = await selectedDevice.device.gatt.connect();
-      setBluetoothServer(server);
+    const attemptConnection = async () => {
+      try {
+        console.log(`Connection attempt ${retryCount + 1}/${MAX_RETRIES}`);
+        console.log('Starting device connection process...');
+        console.log('Selected Device:', {
+          name: selectedDevice.name,
+          id: selectedDevice.id,
+          gatt: selectedDevice.device.gatt ? 'Available' : 'Not Available'
+        });
 
-      const service = await server.getPrimaryService(SERVICE_UUID);
-      setBluetoothService(service);
+        toast({
+          title: 'Connecting',
+          description: `Connecting to ${selectedDevice.name}... (Attempt ${retryCount + 1}/${MAX_RETRIES})`,
+        });
 
-      // Get device information first
-      const deviceInfoCharacteristic = await service.getCharacteristic(DEVICE_INFO_CHARACTERISTIC_UUID);
-      const deviceInfoData = await deviceInfoCharacteristic.readValue();
-      const deviceInfoDecoder = new TextDecoder('utf-8');
-      const deviceInfo = JSON.parse(deviceInfoDecoder.decode(deviceInfoData));
-      
-      console.log('Device Info:', deviceInfo);
+        console.log('Attempting to connect to GATT server...');
+        console.log('Device GATT state before connect:', {
+          connected: selectedDevice.device.gatt?.connected,
+          device: selectedDevice.device
+        });
 
-      // Get sensor information
-      const sensorInfoCharacteristic = await service.getCharacteristic(SENSOR_INFO_CHARACTERISTIC_UUID);
-      const sensorData = await sensorInfoCharacteristic.readValue();
-      const decoder = new TextDecoder('utf-8');
-      const sensorInfoJson = JSON.parse(decoder.decode(sensorData));
+        const server = await selectedDevice.device.gatt.connect();
+        console.log('GATT server connected successfully', {
+          server: server,
+          connected: server.connected,
+          device: server.device
+        });
+        setBluetoothServer(server);
 
-      if (sensorInfoJson.sensors && Array.isArray(sensorInfoJson.sensors)) {
+        console.log('Getting primary service with UUID:', SERVICE_UUID);
+        const service = await server.getPrimaryService(SERVICE_UUID);
+        console.log('Primary service obtained successfully', {
+          service: service,
+          uuid: service.uuid,
+          isPrimary: service.isPrimary
+        });
+        setBluetoothService(service);
+
+        // Get device information first
+        console.log('Reading device information from characteristic:', DEVICE_INFO_CHARACTERISTIC_UUID);
+        const deviceInfoCharacteristic = await service.getCharacteristic(DEVICE_INFO_CHARACTERISTIC_UUID);
+        console.log('Device info characteristic obtained', {
+          characteristic: deviceInfoCharacteristic,
+          uuid: deviceInfoCharacteristic.uuid,
+          properties: deviceInfoCharacteristic.properties
+        });
+
+        const deviceInfoData = await deviceInfoCharacteristic.readValue();
+        const deviceInfoDecoder = new TextDecoder('utf-8');
+        const deviceInfo = JSON.parse(deviceInfoDecoder.decode(deviceInfoData));
+        console.log('Device Information:', {
+          rawData: deviceInfoData,
+          decodedData: deviceInfoDecoder.decode(deviceInfoData),
+          parsedData: deviceInfo
+        });
+
+        // Verify device info response format
+        if (!deviceInfo.name || !deviceInfo.version || !deviceInfo.model) {
+          throw new Error('Invalid device info response format');
+        }
+
+        // Get sensor information
+        console.log('Reading sensor information from characteristic:', SENSOR_INFO_CHARACTERISTIC_UUID);
+        const sensorInfoCharacteristic = await service.getCharacteristic(SENSOR_INFO_CHARACTERISTIC_UUID);
+        console.log('Sensor info characteristic obtained', {
+          characteristic: sensorInfoCharacteristic,
+          uuid: sensorInfoCharacteristic.uuid,
+          properties: sensorInfoCharacteristic.properties
+        });
+
+        const sensorData = await sensorInfoCharacteristic.readValue();
+        const decoder = new TextDecoder('utf-8');
+        const sensorInfoJson = JSON.parse(decoder.decode(sensorData));
+        console.log('Sensor Information:', {
+          rawData: sensorData,
+          decodedData: decoder.decode(sensorData),
+          parsedData: sensorInfoJson
+        });
+
+        // Verify sensor info response format
+        if (!sensorInfoJson.sensors || !Array.isArray(sensorInfoJson.sensors)) {
+          throw new Error('Invalid sensor info response format');
+        }
+
+        console.log('Setting sensor info:', sensorInfoJson.sensors);
         setSensorInfo(sensorInfoJson.sensors);
-      } else {
-        setSensorInfo([]);
-        
-        // Initialize default manual sensor configuration
-        setManualSensorConfig([
-          { id: 'manual-temp', type: 'BME280', isCalibrated: false, isActive: true },
-          { id: 'manual-humid', type: 'HDC1080', isCalibrated: false, isActive: true },
-        ]);
+
+        console.log('Connection process completed successfully');
+        toast({
+          title: 'Connected',
+          description: `Successfully connected to ${selectedDevice.name}`,
+        });
+
+        // Move to the next step
+        setStep('configure');
+        return true;
+      } catch (error) {
+        console.error(`Connection attempt ${retryCount + 1} failed:`, error);
+        console.error('Error details:', {
+          name: error instanceof Error ? error.name : 'Unknown',
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          error: error
+        });
+
+        // Clean up any partial connections
+        if (bluetoothServer) {
+          try {
+            console.log('Cleaning up partial connection...');
+            await bluetoothServer.disconnect();
+            console.log('Successfully disconnected from server');
+          } catch (e) {
+            console.error('Error during cleanup:', e);
+          }
+        }
+        setBluetoothServer(null);
+        setBluetoothService(null);
+
+        if (retryCount < MAX_RETRIES - 1) {
+          retryCount++;
+          console.log(`Retrying connection in 1 second... (${retryCount}/${MAX_RETRIES})`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return attemptConnection();
+        } else {
+          toast({
+            title: 'Connection Error',
+            description: 'Failed to connect to device after multiple attempts. Please ensure the device is in pairing mode and try again.',
+            variant: 'destructive',
+          });
+          return false;
+        }
       }
+    };
 
-      toast({
-        title: 'Connected',
-        description: `Successfully connected to ${selectedDevice.name}`,
-      });
-
-      // Move to the next step
-      setStep('configure');
-    } catch (error) {
-      console.error('Connection error:', error);
-      toast({
-        title: 'Connection Error',
-        description: error instanceof Error ? error.message : 'Failed to connect to device',
-        variant: 'destructive',
-      });
-    }
-  }, [selectedDevice, toast]);
+    return attemptConnection();
+  }, [selectedDevice, toast, bluetoothServer]);
 
   // Disconnect from the device
   const disconnectDevice = useCallback((keepState = false) => {
+    console.log('Disconnecting device:', {
+      keepState,
+      currentStep: step,
+      hasServer: !!bluetoothServer,
+      hasService: !!bluetoothService,
+      hasLiveDataSubscription: !!liveDataSubscription
+    });
+
     try {
       // Unsubscribe from notifications
       if (liveDataSubscription) {
+        console.log('Removing live data subscription');
         liveDataSubscription.removeEventListener('characteristicvaluechanged', handleLiveData);
         setLiveDataSubscription(null);
       }
       
       if (bluetoothServer) {
+        console.log('Disconnecting GATT server');
         bluetoothServer.disconnect();
       }
       
       if (!keepState) {
+        console.log('Resetting to initial state');
         // Reset to initial state
         setBluetoothServer(null);
         setBluetoothService(null);
@@ -302,6 +418,7 @@ export function useDeviceOnboarding() {
         setLiveData(null);
         setStep('scan');
       } else {
+        console.log('Moving back one step from:', step);
         // Just go back one step
         if (step === 'configure') setStep('scan');
         if (step === 'profile') setStep('configure');
@@ -309,6 +426,11 @@ export function useDeviceOnboarding() {
       }
     } catch (error) {
       console.error('Disconnect error:', error);
+      console.error('Error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
     }
   }, [bluetoothServer, step, liveDataSubscription]);
 

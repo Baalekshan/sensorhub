@@ -7,6 +7,7 @@ import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import Image from 'next/image';
+import { ActivitySquare, Bell, LineChart, Settings, Cpu, Zap } from 'lucide-react';
 
 export default function HomePage() {
   const { user, isLoading } = useAuth();
@@ -32,13 +33,12 @@ export default function HomePage() {
         <div className="container flex h-14 items-center">
           <div className="mr-4 flex">
             <Link href="/" className="mr-6 flex items-center space-x-2">
-              <Image
-                src="/logo.png"
-                alt="SensorHub Logo"
-                width={32}
-                height={32}
-                className="rounded-full"
-              />
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                <path d="M21.5 2h-19A2.5 2.5 0 0 0 0 4.5v11A2.5 2.5 0 0 0 2.5 18H10v4l4-4h7.5a2.5 2.5 0 0 0 2.5-2.5v-11A2.5 2.5 0 0 0 21.5 2z" />
+                <path d="M7 9h.01" />
+                <path d="M12 9h.01" />
+                <path d="M17 9h.01" />
+              </svg>
               <span className="font-bold">SensorHub</span>
             </Link>
           </div>
@@ -103,6 +103,7 @@ export default function HomePage() {
                   <p className="text-sm text-muted-foreground">
                     Get instant updates on your sensor readings
                   </p>
+                  <ActivitySquare className="h-5 w-5" />
                 </div>
               </div>
             </div>
@@ -113,6 +114,7 @@ export default function HomePage() {
                   <p className="text-sm text-muted-foreground">
                     Receive notifications when thresholds are exceeded
                   </p>
+                  <Bell className="h-5 w-5" />
                 </div>
               </div>
             </div>
@@ -123,6 +125,40 @@ export default function HomePage() {
                   <p className="text-sm text-muted-foreground">
                     Analyze trends and patterns in your sensor data
                   </p>
+                  <LineChart className="h-5 w-5" />
+                </div>
+              </div>
+            </div>
+            <div className="relative overflow-hidden rounded-lg border bg-background p-2">
+              <div className="flex h-[180px] flex-col justify-between rounded-md p-6">
+                <div className="space-y-2">
+                  <h3 className="font-bold">Sensor Calibration</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Maintain accurate readings with easy calibration tools
+                  </p>
+                  <Settings className="h-5 w-5" />
+                </div>
+              </div>
+            </div>
+            <div className="relative overflow-hidden rounded-lg border bg-background p-2">
+              <div className="flex h-[180px] flex-col justify-between rounded-md p-6">
+                <div className="space-y-2">
+                  <h3 className="font-bold">Device Management</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Easily configure and manage your IoT devices
+                  </p>
+                  <Cpu className="h-5 w-5" />
+                </div>
+              </div>
+            </div>
+            <div className="relative overflow-hidden rounded-lg border bg-background p-2">
+              <div className="flex h-[180px] flex-col justify-between rounded-md p-6">
+                <div className="space-y-2">
+                  <h3 className="font-bold">Power Management</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Monitor and optimize battery life of your sensors
+                  </p>
+                  <Zap className="h-5 w-5" />
                 </div>
               </div>
             </div>
