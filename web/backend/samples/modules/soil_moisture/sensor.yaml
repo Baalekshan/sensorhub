@@ -1,0 +1,17 @@
+sensor_type: Soil Moisture
+unit: "%"
+description: "Capacitive soil moisture sensor"
+icon: "droplet"
+safe_range: [20, 80]
+calibration_required: true
+calibration_steps:
+  - step: "Place sensor in dry soil"
+  - step: "Record the dry value"
+  - step: "Place sensor in water"
+  - step: "Record the wet value"
+version: "1.0.0"
+accuracy: "±3%"
+resolution: "1%"
+measurement_range: [0, 100]
+response_time: "1s"
+power_consumption: "0.3mA" 

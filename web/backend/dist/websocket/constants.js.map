@@ -1,0 +1,1 @@
+{"version":3,"file":"constants.js","sourceRoot":"","sources":["../../src/websocket/constants.ts"],"names":[],"mappings":";;;AAAa,QAAA,OAAO,GAAG,SAAS,CAAC;AAGjC,IAAY,kBAcX;AAdD,WAAY,kBAAkB;IAE5B,iEAA2C,CAAA;IAC3C,mEAA6C,CAAA;IAG7C,0DAAoC,CAAA;IACpC,gEAA0C,CAAA;IAC1C,mEAA6C,CAAA;IAG7C,oDAA8B,CAAA;IAC9B,wDAAkC,CAAA;IAClC,sDAAgC,CAAA;AAClC,CAAC,EAdW,kBAAkB,kCAAlB,kBAAkB,QAc7B"}

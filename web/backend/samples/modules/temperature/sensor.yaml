@@ -1,0 +1,12 @@
+sensor_type: Temperature
+unit: "°C"
+description: "High-precision temperature sensor"
+icon: "thermometer"
+safe_range: [10, 35]
+calibration_required: false
+version: "1.0.0"
+accuracy: "±0.5°C"
+resolution: "0.1°C"
+measurement_range: [-40, 125]
+response_time: "1.5s"
+power_consumption: "0.08mA" 

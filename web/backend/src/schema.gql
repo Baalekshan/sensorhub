@@ -1,0 +1,159 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Alert {
+  createdAt: DateTime!
+  id: ID!
+  lastTriggeredAt: DateTime
+  message: String
+  sendEmail: Boolean!
+  sendPush: Boolean!
+  sendSms: Boolean!
+  sensor: Sensor!
+  sensorId: String!
+  status: String!
+  thresholdSecondaryValue: Float
+  thresholdType: String!
+  thresholdValue: Float!
+  updatedAt: DateTime!
+  user: User!
+  userId: String!
+}
+
+type CalibrationRecord {
+  calibrationData: JSON!
+  createdAt: DateTime!
+  id: ID!
+  isActive: Boolean!
+  performedBy: String
+  sensor: Sensor!
+  sensorId: String!
+}
+
+input CreateDeviceInput {
+  firmwareVersion: String
+  ipAddress: String
+  location: String
+  macAddress: String
+  name: String!
+  status: String
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Device {
+  batteryLevel: Float
+  createdAt: DateTime!
+  firmwareVersion: String
+  id: ID!
+  ipAddress: String
+  lastSync: DateTime
+  location: String
+  macAddress: String
+  name: String!
+  sensors: [Sensor!]
+  status: String!
+  updatedAt: DateTime!
+  user: User!
+  userId: String!
+  wifiStrength: Float
+}
+
+"""JSON custom scalar type"""
+scalar JSON
+
+type Mutation {
+  createDevice(createDeviceInput: CreateDeviceInput!): Device!
+  removeDevice(id: ID!): Boolean!
+  updateDevice(updateDeviceInput: UpdateDeviceInput!): Device!
+}
+
+type Query {
+  device(id: ID!): Device!
+  devices: [Device!]!
+  sensorTypes: [SensorType!]!
+}
+
+type SafeRanges {
+  max: Float!
+  min: Float!
+  warningMax: Float
+  warningMin: Float
+}
+
+type Sensor {
+  calibrationData: JSON
+  calibrationRecords: [CalibrationRecord!]
+  createdAt: DateTime!
+  currentReading: Float
+  device: Device!
+  deviceId: String!
+  id: ID!
+  lastReadingAt: DateTime
+  name: String!
+  readings: [SensorReading!]
+  sensorType: SensorType!
+  sensorTypeId: String!
+  status: String!
+  updatedAt: DateTime!
+}
+
+type SensorReading {
+  createdAt: DateTime!
+  id: ID!
+  metadata: JSON
+  sensor: Sensor!
+  sensorId: String!
+  timestamp: DateTime!
+  value: Float!
+}
+
+type SensorType {
+  calibrationRequired: Boolean!
+  calibrationSteps: [String!]
+  createdAt: DateTime!
+  description: String
+  icon: String
+  id: ID!
+  isActive: Boolean!
+  name: String!
+  safeRanges: SafeRanges
+  sensors: [Sensor!]
+  unit: String!
+  updatedAt: DateTime!
+  version: String!
+}
+
+type Subscription {
+  deviceCreated(userId: ID!): Device!
+  deviceRemoved(userId: ID!): ID!
+  deviceUpdated(userId: ID!): Device!
+}
+
+input UpdateDeviceInput {
+  firmwareVersion: String
+  id: ID!
+  ipAddress: String
+  location: String
+  macAddress: String
+  name: String
+  status: String
+}
+
+type User {
+  alerts: [Alert!]
+  appleId: String
+  avatar: String
+  createdAt: DateTime!
+  devices: [Device!]
+  email: String!
+  googleId: String
+  id: ID!
+  name: String!
+  role: String!
+  updatedAt: DateTime!
+}

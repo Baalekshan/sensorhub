@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14-alpine
+    container_name: sensorhub-postgres
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=sensorhub
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - sensorhub-network
+
+  redis:
+    image: redis:alpine
+    container_name: sensorhub-redis
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-data:/data
+    networks:
+      - sensorhub-network
+
+networks:
+  sensorhub-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data: 
