@@ -107,9 +107,9 @@ export default function LiveDataPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'normal':
-        return <Badge variant="success">Normal</Badge>;
+        return <Badge variant="default">Normal</Badge>;
       case 'warning':
-        return <Badge variant="warning">Warning</Badge>;
+        return <Badge variant="secondary">Warning</Badge>;
       case 'critical':
         return <Badge variant="destructive">Critical</Badge>;
       default:

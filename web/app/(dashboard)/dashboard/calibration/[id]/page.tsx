@@ -13,10 +13,38 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/hooks/use-toast';
+import useToastNotifications from '@/hooks/use-toast-notifications';
+
+interface CalibrationPoint {
+  name: string;
+  expected: string;
+  measured: string | null;
+  raw: number | null;
+}
+
+interface CalibrationData {
+  id: string;
+  sensorName: string;
+  sensorType: string;
+  moduleVersion: string;
+  lastCalibration: string;
+  status: string;
+  currentValues: {
+    raw: number;
+    calibrated: string;
+  };
+  calibrationMethod: string;
+  points: CalibrationPoint[];
+  parameters: {
+    offset: number;
+    gain: number;
+    nonLinearity: number;
+  };
+  advice: string;
+}
 
 // Mock calibration data
-const mockCalibrationData = {
+const mockCalibrationData: CalibrationData = {
   id: '1',
   sensorName: 'Soil Moisture Sensor',
   sensorType: 'Soil Moisture',
@@ -49,7 +77,7 @@ export default function CalibrationDetailPage({ params }: { params: { id: string
   const [advancedMode, setAdvancedMode] = useState(false);
   const [currentRawValue, setCurrentRawValue] = useState(2048);
   const router = useRouter();
-  const { toast } = useToast();
+  const { toast } = useToastNotifications();
 
   const steps = [
     'Preparation',
@@ -71,7 +99,7 @@ export default function CalibrationDetailPage({ params }: { params: { id: string
       ...updatedPoints[pointIndex],
       measured: `${simulatedValue.toFixed(1)}%`,
       raw: Math.round(simulatedRaw),
-    };
+    } as CalibrationPoint;
     
     setCalibrationData({
       ...calibrationData,

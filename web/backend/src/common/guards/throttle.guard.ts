@@ -1,6 +1,6 @@
 import { Injectable, ExecutionContext } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { ThrottlerGuard, ThrottlerException } from '@nestjs/throttler';
+import { ThrottlerGuard, ThrottlerException, ThrottlerLimitDetail } from '@nestjs/throttler';
 
 @Injectable()
 export class GqlThrottlerGuard extends ThrottlerGuard {
@@ -17,7 +17,7 @@ export class GqlThrottlerGuard extends ThrottlerGuard {
   }
 
   // Override to provide a more specific error message
-  protected throwThrottlingException(): void {
+  protected throwThrottlingException(context: ExecutionContext, throttlerLimitDetail: ThrottlerLimitDetail): Promise<void> {
     throw new ThrottlerException('Too many requests. Please try again later.');
   }
 } 

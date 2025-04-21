@@ -9,13 +9,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.WebsocketModule = void 0;
 const common_1 = require("@nestjs/common");
 const websocket_gateway_1 = require("./websocket.gateway");
+const auth_module_1 = require("../auth/auth.module");
+const graphql_subscriptions_1 = require("graphql-subscriptions");
+const constants_1 = require("./constants");
 let WebsocketModule = class WebsocketModule {
 };
 exports.WebsocketModule = WebsocketModule;
 exports.WebsocketModule = WebsocketModule = __decorate([
     (0, common_1.Module)({
-        providers: [websocket_gateway_1.WebsocketGateway],
-        exports: [websocket_gateway_1.WebsocketGateway],
+        imports: [auth_module_1.AuthModule],
+        providers: [
+            websocket_gateway_1.WebsocketGateway,
+            {
+                provide: constants_1.PUB_SUB,
+                useValue: new graphql_subscriptions_1.PubSub(),
+            },
+        ],
+        exports: [websocket_gateway_1.WebsocketGateway, constants_1.PUB_SUB],
     })
 ], WebsocketModule);
 //# sourceMappingURL=websocket.module.js.map

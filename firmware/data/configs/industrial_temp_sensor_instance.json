@@ -1,0 +1,81 @@
+{
+    "sensorConfig": {
+        "id": "industrial_temp_1",
+        "name": "Boiler Temperature Sensor",
+        "type": "temperature",
+        "bus": "i2c",
+        "protocol": "IndustrialTempSensor",
+        "enabled": true,
+        "description": "High-precision temperature sensor for boiler monitoring",
+        
+        "busConfig": {
+            "address": "0x48",
+            "sdaPin": 21,
+            "sclPin": 22,
+            "frequency": 100000
+        },
+        
+        "sensorConfig": {
+            "resolution": "14-bit",
+            "sampleRate": "8Hz",
+            "alarmEnable": true,
+            "interruptEnable": true,
+            "highLimit": 95.0,
+            "lowLimit": 50.0,
+            "interruptPin": 5
+        },
+        
+        "calibrationConfig": {
+            "method": "linear",
+            "parameters": {
+                "offset": -0.5,
+                "scale": 1.02
+            }
+        },
+        
+        "readingOptions": {
+            "samplingInterval": 5000,
+            "reportingThreshold": 0.5,
+            "averagingWindow": 4,
+            "logEnabled": true,
+            "alarmEnabled": true
+        },
+        
+        "tags": [
+            "boiler",
+            "temperature",
+            "critical",
+            "industrial"
+        ],
+        
+        "location": {
+            "zone": "Boiler Room",
+            "area": "Production Line 1",
+            "position": "Main Boiler",
+            "coordinates": {
+                "x": 12.5,
+                "y": 8.2,
+                "z": 1.8
+            }
+        },
+        
+        "visualization": {
+            "dashboardId": "boiler-dashboard",
+            "widget": "gauge",
+            "color": "#FF5733",
+            "minValue": 0,
+            "maxValue": 150,
+            "warningThreshold": 85,
+            "criticalThreshold": 90,
+            "unit": "°C"
+        },
+        
+        "alerts": {
+            "email": ["maintenance@example.com", "operations@example.com"],
+            "sms": ["+1234567890"],
+            "highThreshold": 90,
+            "lowThreshold": 45,
+            "rateOfChangeThreshold": 5
+        }
+    }
+} 

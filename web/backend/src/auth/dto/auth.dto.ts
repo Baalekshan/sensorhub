@@ -5,27 +5,27 @@ import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
 export class LoginInput {
   @Field()
   @IsEmail()
-  email: string;
+  email!: string;
 
   @Field()
   @IsNotEmpty()
-  password: string;
+  password!: string;
 }
 
 @InputType()
 export class RegisterInput {
   @Field()
   @IsEmail()
-  email: string;
+  email!: string;
 
   @Field()
   @IsNotEmpty()
   @MinLength(6)
-  password: string;
+  password!: string;
 
   @Field()
   @IsNotEmpty()
-  name: string;
+  name!: string;
 }
 
 @InputType()
@@ -39,26 +39,26 @@ export class RefreshTokensInput {
 @ObjectType()
 export class UserResponse {
   @Field()
-  id: string;
+  id!: string;
 
   @Field()
-  name: string;
+  name!: string;
 
   @Field()
-  email: string;
+  email!: string;
 
   @Field()
-  role: string;
+  role!: string;
 }
 
 @ObjectType()
 export class LoginResponse {
   @Field()
-  accessToken: string;
+  accessToken!: string;
 
   @Field()
-  refreshToken: string;
+  refreshToken!: string;
 
   @Field(() => UserResponse)
-  user: UserResponse;
+  user!: UserResponse;
 } 

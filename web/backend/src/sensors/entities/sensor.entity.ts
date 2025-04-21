@@ -2,6 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateCol
 import { Field, ObjectType, GraphQLISODateTime } from '@nestjs/graphql';
 import { Device } from '../../devices/entities/device.entity';
 import { SensorReading } from './sensor-reading.entity';
+import { CalibrationRecord } from './calibration-record.entity';
 
 @ObjectType()
 @Entity('sensors')
@@ -50,4 +51,8 @@ export class Sensor {
   @Field(() => [SensorReading], { nullable: true })
   @OneToMany(() => SensorReading, reading => reading.sensor)
   readings: SensorReading[];
+  
+  @Field(() => [CalibrationRecord], { nullable: true })
+  @OneToMany(() => CalibrationRecord, record => record.sensor)
+  calibrationRecords: CalibrationRecord[];
 } 

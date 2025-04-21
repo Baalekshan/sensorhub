@@ -26,7 +26,11 @@ let JwtRefreshStrategy = class JwtRefreshStrategy extends (0, passport_1.Passpor
         this.usersService = usersService;
     }
     async validate(req, payload) {
-        const refreshToken = req.get('Authorization').replace('Bearer', '').trim();
+        const authHeader = req.get('Authorization');
+        if (!authHeader) {
+            throw new common_1.UnauthorizedException('Missing authorization header');
+        }
+        const refreshToken = authHeader.replace('Bearer', '').trim();
         const user = await this.usersService.findOneById(payload.sub);
         if (!user) {
             throw new common_1.UnauthorizedException('User not found');

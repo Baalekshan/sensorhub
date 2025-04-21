@@ -8,7 +8,7 @@ const http_exception_filter_1 = require("./common/filters/http-exception.filter"
 const logging_interceptor_1 = require("./common/interceptors/logging.interceptor");
 const throttle_guard_1 = require("./common/guards/throttle.guard");
 const helmet_1 = require("helmet");
-const graphql_upload_1 = require("graphql-upload");
+const graphql_upload_minimal_1 = require("graphql-upload-minimal");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     const configService = app.get(config_1.ConfigService);
@@ -24,7 +24,7 @@ async function bootstrap() {
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         credentials: true,
     });
-    app.use((0, graphql_upload_1.graphqlUploadExpress)({ maxFileSize: 10000000, maxFiles: 10 }));
+    app.use((0, graphql_upload_minimal_1.graphqlUploadExpress)({ maxFileSize: 10000000, maxFiles: 10 }));
     app.setGlobalPrefix('api');
     app.useGlobalPipes(new common_1.ValidationPipe({
         transform: true,

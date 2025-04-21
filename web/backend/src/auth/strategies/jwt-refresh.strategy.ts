@@ -20,7 +20,11 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
   }
 
   async validate(req: Request, payload: JwtPayload) {
-    const refreshToken = req.get('Authorization').replace('Bearer', '').trim();
+    const authHeader = req.get('Authorization');
+    if (!authHeader) {
+      throw new UnauthorizedException('Missing authorization header');
+    }
+    const refreshToken = authHeader.replace('Bearer', '').trim();
     const user = await this.usersService.findOneById(payload.sub);
     
     if (!user) {

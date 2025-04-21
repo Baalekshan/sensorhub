@@ -43,7 +43,7 @@ let HealthService = class HealthService {
         catch (error) {
             return {
                 status: 'down',
-                error: error.message,
+                error: error instanceof Error ? error.message : String(error),
             };
         }
     }
@@ -58,7 +58,7 @@ let HealthService = class HealthService {
         catch (error) {
             return {
                 status: 'down',
-                error: error.message,
+                error: error instanceof Error ? error.message : String(error),
             };
         }
     }

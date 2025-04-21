@@ -5,12 +5,14 @@ import { ApolloProviderWrapper } from '@/components/providers/apollo-provider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { AuthProvider } from '@/context/auth-context';
 import { Toaster } from "@/components/ui/toaster";
+import { ToastNotificationsProvider } from '@/hooks/use-toast-notifications';
+import { ToastNotifications } from '@/components/ui/toast-notifications';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'SensorHub',
-  description: 'IoT Platform for Sensor Management',
+  title: 'SensorHub - IoT Management Platform',
+  description: 'Manage and monitor your IoT devices with ease',
 };
 
 export default function RootLayout({
@@ -21,19 +23,21 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ApolloProviderWrapper>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <AuthProvider>
-              {children}
-              <Toaster />
-            </AuthProvider>
-          </ThemeProvider>
-        </ApolloProviderWrapper>
+        <ToastNotificationsProvider>
+          <ApolloProviderWrapper>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <AuthProvider>
+                {children}
+                <ToastNotifications />
+              </AuthProvider>
+            </ThemeProvider>
+          </ApolloProviderWrapper>
+        </ToastNotificationsProvider>
       </body>
     </html>
   );

@@ -132,7 +132,9 @@ export default function AddDevicePage() {
               />
             </CardContent>
             <CardFooter className="flex justify-between">
-              <Button variant="outline" onClick={disconnectDevice}>
+              <Button variant="outline" onClick={() => {
+                disconnectDevice();
+              }}>
                 Back
               </Button>
               <Button onClick={configureSensors}>

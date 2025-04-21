@@ -1,5 +1,6 @@
 import { Device } from '../../devices/entities/device.entity';
 import { SensorReading } from './sensor-reading.entity';
+import { CalibrationRecord } from './calibration-record.entity';
 export declare class Sensor {
     id: string;
     deviceId: string;
@@ -12,4 +13,5 @@ export declare class Sensor {
     updatedAt: Date;
     metadata: Record<string, any>;
     readings: SensorReading[];
+    calibrationRecords: CalibrationRecord[];
 }

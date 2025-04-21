@@ -4,14 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
+import { useToastNotifications } from '@/hooks/use-toast-notifications';
 import { useDeviceOnboarding } from '@/hooks/useDeviceOnboarding';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Bluetooth, Loader2, Cpu } from 'lucide-react';
 
 export default function AddDevicePage() {
   const router = useRouter();
-  const { toast } = useToast();
+  const { toast } = useToastNotifications();
   const [activeTab, setActiveTab] = useState('bluetooth');
   const {
     step,
@@ -27,10 +27,12 @@ export default function AddDevicePage() {
     stopScan,
     selectDevice,
     connectToDevice,
+    disconnectDevice,
     configureSensors,
     selectProfile,
     flashProfile,
     finalizeOnboarding,
+    setStep,
   } = useDeviceOnboarding();
 
   const handleCancel = () => {
@@ -126,6 +128,93 @@ export default function AddDevicePage() {
                       </div>
                     </div>
                   )}
+                </div>
+              ) : step === 'configure' ? (
+                <div className="space-y-4">
+                  <p>Device connected successfully! Found {sensorInfo.length} sensors.</p>
+                  <div className="space-y-2">
+                    {sensorInfo.map((sensor, index) => (
+                      <div key={index} className="p-3 border rounded-md">
+                        <div className="font-medium">{sensor.type}</div>
+                        <div className="text-xs text-muted-foreground">
+                          ID: {sensor.id} | Status: {sensor.isActive ? 'Active' : 'Inactive'}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex justify-center space-x-4">
+                    <Button onClick={configureSensors}>
+                      Continue to Profile Selection
+                    </Button>
+                    <Button variant="outline" onClick={() => disconnectDevice(true)}>
+                      Back
+                    </Button>
+                  </div>
+                </div>
+              ) : step === 'profile' ? (
+                <div className="space-y-4">
+                  <p>Select a profile for your device:</p>
+                  <div className="space-y-2">
+                    {availableProfiles.map((profile) => (
+                      <div 
+                        key={profile.id}
+                        className={`p-3 border rounded-md cursor-pointer ${
+                          selectedProfile?.id === profile.id ? 'border-primary bg-primary/5' : ''
+                        }`}
+                        onClick={() => selectProfile(profile)}
+                      >
+                        <div className="font-medium">{profile.name}</div>
+                        <div className="text-sm">{profile.description}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex justify-center space-x-4">
+                    <Button 
+                      onClick={flashProfile}
+                      disabled={!selectedProfile}
+                    >
+                      Apply Profile
+                    </Button>
+                    <Button variant="outline" onClick={() => setStep('configure')}>
+                      Back
+                    </Button>
+                  </div>
+                </div>
+              ) : step === 'flashing' ? (
+                <div className="space-y-4 text-center">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+                  <p>Applying profile to device...</p>
+                  <div className="w-full bg-secondary rounded-full h-2">
+                    <div 
+                      className="bg-primary h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+              ) : step === 'review' ? (
+                <div className="space-y-4">
+                  <div className="p-4 border rounded-md bg-green-50">
+                    <h3 className="font-medium text-green-800">Device Setup Complete!</h3>
+                    <p className="text-sm text-green-700 mt-1">
+                      Your device has been configured successfully.
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="font-medium">Device Summary:</p>
+                    <div className="text-sm space-y-1">
+                      <p>Name: {selectedDevice?.name}</p>
+                      <p>Profile: {selectedProfile?.name}</p>
+                      <p>Sensors: {sensorInfo.length}</p>
+                    </div>
+                  </div>
+                  <div className="flex justify-center space-x-4">
+                    <Button onClick={finalizeOnboarding}>
+                      Finish Setup
+                    </Button>
+                    <Button variant="outline" onClick={() => setStep('profile')}>
+                      Back
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <div className="p-4 text-center">

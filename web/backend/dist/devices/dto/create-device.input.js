@@ -8,7 +8,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateDeviceInput = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -19,40 +18,32 @@ let CreateDeviceInput = class CreateDeviceInput {
 exports.CreateDeviceInput = CreateDeviceInput;
 __decorate([
     (0, graphql_1.Field)(),
-    (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateDeviceInput.prototype, "name", void 0);
 __decorate([
-    (0, graphql_1.Field)({ nullable: true }),
-    (0, class_validator_1.IsOptional)(),
+    (0, graphql_1.Field)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateDeviceInput.prototype, "location", void 0);
+], CreateDeviceInput.prototype, "bluetoothAddress", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsEnum)(device_entity_1.DeviceStatus),
-    __metadata("design:type", typeof (_a = typeof device_entity_1.DeviceStatus !== "undefined" && device_entity_1.DeviceStatus) === "function" ? _a : Object)
-], CreateDeviceInput.prototype, "status", void 0);
-__decorate([
-    (0, graphql_1.Field)({ nullable: true }),
-    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateDeviceInput.prototype, "firmwareVersion", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsEnum)(device_entity_1.DeviceStatus),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateDeviceInput.prototype, "macAddress", void 0);
+], CreateDeviceInput.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsUUID)(),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateDeviceInput.prototype, "ipAddress", void 0);
+], CreateDeviceInput.prototype, "userId", void 0);
 exports.CreateDeviceInput = CreateDeviceInput = __decorate([
     (0, graphql_1.InputType)()
 ], CreateDeviceInput);

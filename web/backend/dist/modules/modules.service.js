@@ -25,11 +25,13 @@ const path = require("path");
 const yaml = require("js-yaml");
 const module_repository_entity_1 = require("./entities/module-repository.entity");
 const sensor_type_entity_1 = require("../sensors/entities/sensor-type.entity");
+const module_entity_1 = require("./module.entity");
 let ModulesService = ModulesService_1 = class ModulesService {
-    constructor(moduleRepoRepository, sensorTypeRepository, configService) {
+    constructor(moduleRepoRepository, sensorTypeRepository, configService, moduleRepository) {
         this.moduleRepoRepository = moduleRepoRepository;
         this.sensorTypeRepository = sensorTypeRepository;
         this.configService = configService;
+        this.moduleRepository = moduleRepository;
         this.logger = new common_1.Logger(ModulesService_1.name);
     }
     async onModuleInit() {
@@ -195,14 +197,36 @@ let ModulesService = ModulesService_1 = class ModulesService {
     async findAllSensorTypes() {
         return this.sensorTypeRepository.find({ where: { isActive: true } });
     }
+    async findAll() {
+        return this.moduleRepository.find({ where: { isActive: true } });
+    }
+    async findOne(id) {
+        return this.moduleRepository.findOne({ where: { id } });
+    }
+    async findByName(name) {
+        return this.moduleRepository.findOne({ where: { name } });
+    }
+    async create(moduleData) {
+        const module = this.moduleRepository.create(moduleData);
+        return this.moduleRepository.save(module);
+    }
+    async update(id, moduleData) {
+        await this.moduleRepository.update(id, moduleData);
+        return this.moduleRepository.findOne({ where: { id } });
+    }
+    async remove(id) {
+        await this.moduleRepository.delete(id);
+    }
 };
 exports.ModulesService = ModulesService;
 exports.ModulesService = ModulesService = ModulesService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(module_repository_entity_1.ModuleRepository)),
     __param(1, (0, typeorm_1.InjectRepository)(sensor_type_entity_1.SensorType)),
+    __param(3, (0, typeorm_1.InjectRepository)(module_entity_1.Module)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
-        config_1.ConfigService])
+        config_1.ConfigService,
+        typeorm_2.Repository])
 ], ModulesService);
 //# sourceMappingURL=modules.service.js.map

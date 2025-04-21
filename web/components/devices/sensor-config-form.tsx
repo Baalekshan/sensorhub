@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { SensorInfo } from '../../hooks/useDeviceOnboarding';
 import { Card, CardContent } from '../ui/card';

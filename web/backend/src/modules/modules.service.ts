@@ -9,6 +9,7 @@ import * as path from 'path';
 import * as yaml from 'js-yaml';
 import { ModuleRepository } from './entities/module-repository.entity';
 import { SensorType } from '../sensors/entities/sensor-type.entity';
+import { Module } from './module.entity';
 
 @Injectable()
 export class ModulesService implements OnModuleInit {
@@ -21,6 +22,8 @@ export class ModulesService implements OnModuleInit {
     @InjectRepository(SensorType)
     private sensorTypeRepository: Repository<SensorType>,
     private configService: ConfigService,
+    @InjectRepository(Module)
+    private moduleRepository: Repository<Module>,
   ) {}
 
   async onModuleInit() {
@@ -226,5 +229,31 @@ export class ModulesService implements OnModuleInit {
   // Get all sensor types
   async findAllSensorTypes() {
     return this.sensorTypeRepository.find({ where: { isActive: true } });
+  }
+
+  async findAll(): Promise<Module[]> {
+    return this.moduleRepository.find({ where: { isActive: true } });
+  }
+
+  async findOne(id: string): Promise<Module> {
+    return this.moduleRepository.findOne({ where: { id } });
+  }
+
+  async findByName(name: string): Promise<Module> {
+    return this.moduleRepository.findOne({ where: { name } });
+  }
+
+  async create(moduleData: Partial<Module>): Promise<Module> {
+    const module = this.moduleRepository.create(moduleData);
+    return this.moduleRepository.save(module);
+  }
+
+  async update(id: string, moduleData: Partial<Module>): Promise<Module> {
+    await this.moduleRepository.update(id, moduleData);
+    return this.moduleRepository.findOne({ where: { id } });
+  }
+
+  async remove(id: string): Promise<void> {
+    await this.moduleRepository.delete(id);
   }
 } 

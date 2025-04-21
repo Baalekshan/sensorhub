@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/hooks/use-toast';
+import useToastNotifications from '@/hooks/use-toast-notifications';
 
 // Mock data for calibration
 const mockCalibrationData = [
@@ -82,7 +82,7 @@ const mockCalibrationData = [
 
 export default function CalibrationPage() {
   const [calibrationData, setCalibrationData] = useState(mockCalibrationData);
-  const { toast } = useToast();
+  const { toast } = useToastNotifications();
 
   const getStatusBadge = (status: string) => {
     switch (status) {

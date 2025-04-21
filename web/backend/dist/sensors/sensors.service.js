@@ -19,11 +19,38 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const sensor_entity_1 = require("./entities/sensor.entity");
 const sensor_reading_entity_1 = require("./entities/sensor-reading.entity");
+const calibration_record_entity_1 = require("./entities/calibration-record.entity");
 let SensorsService = SensorsService_1 = class SensorsService {
-    constructor(sensorRepository, sensorReadingRepository) {
+    constructor(sensorRepository, sensorReadingRepository, calibrationRecordRepository) {
         this.sensorRepository = sensorRepository;
         this.sensorReadingRepository = sensorReadingRepository;
+        this.calibrationRecordRepository = calibrationRecordRepository;
         this.logger = new common_1.Logger(SensorsService_1.name);
+    }
+    async findAll() {
+        return this.sensorRepository.find();
+    }
+    async findById(id) {
+        const sensor = await this.sensorRepository.findOne({
+            where: { id },
+        });
+        if (!sensor) {
+            throw new Error(`Sensor not found: ${id}`);
+        }
+        return sensor;
+    }
+    async getSensorReadings(sensorId) {
+        return this.sensorReadingRepository.find({
+            where: { sensorId },
+            order: { timestamp: 'DESC' },
+            take: 100,
+        });
+    }
+    async getSensorCalibrationRecords(sensorId) {
+        return this.calibrationRecordRepository.find({
+            where: { sensorId },
+            order: { createdAt: 'DESC' },
+        });
     }
     async updateSensor(deviceId, sensorId, data) {
         this.logger.debug(`Updating sensor ${sensorId} for device ${deviceId}`);
@@ -59,7 +86,9 @@ exports.SensorsService = SensorsService = SensorsService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(sensor_entity_1.Sensor)),
     __param(1, (0, typeorm_1.InjectRepository)(sensor_reading_entity_1.SensorReading)),
+    __param(2, (0, typeorm_1.InjectRepository)(calibration_record_entity_1.CalibrationRecord)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository])
 ], SensorsService);
 //# sourceMappingURL=sensors.service.js.map

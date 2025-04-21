@@ -23,14 +23,16 @@ const sensor_reading_entity_1 = require("../sensors/entities/sensor-reading.enti
 const websocket_gateway_1 = require("../websocket/websocket.gateway");
 const analytics_service_1 = require("../analytics/analytics.service");
 const sensors_service_1 = require("../sensors/sensors.service");
+const event_emitter_1 = require("@nestjs/event-emitter");
 let DevicesService = DevicesService_1 = class DevicesService {
-    constructor(devicesRepository, sensorsRepository, sensorReadingRepository, websocketGateway, analyticsService, sensorsService) {
+    constructor(devicesRepository, sensorsRepository, sensorReadingRepository, websocketGateway, analyticsService, sensorsService, eventEmitter) {
         this.devicesRepository = devicesRepository;
         this.sensorsRepository = sensorsRepository;
         this.sensorReadingRepository = sensorReadingRepository;
         this.websocketGateway = websocketGateway;
         this.analyticsService = analyticsService;
         this.sensorsService = sensorsService;
+        this.eventEmitter = eventEmitter;
         this.logger = new common_1.Logger(DevicesService_1.name);
     }
     async findAll(userId) {
@@ -321,6 +323,66 @@ let DevicesService = DevicesService_1 = class DevicesService {
             throw new Error(`Failed to get latest readings: ${error.message}`);
         }
     }
+    async onModuleInit() {
+        this.eventEmitter.on('device.info.requested', async (data) => {
+            var _a;
+            try {
+                const device = await this.getDeviceById(data.deviceId);
+                if (device) {
+                    this.eventEmitter.emit('device.info.response', {
+                        deviceId: device.id,
+                        deviceInfo: {
+                            id: device.id,
+                            type: ((_a = device.bluetoothAddress) === null || _a === void 0 ? void 0 : _a.split(':')[0]) || 'GENERIC',
+                            firmwareVersion: device.firmwareVersion || '1.0.0',
+                        }
+                    });
+                }
+            }
+            catch (error) {
+                console.error(`Error fetching device info for ${data.deviceId}:`, error);
+            }
+        });
+        this.eventEmitter.on('device.health.check.requested', async (data) => {
+            try {
+                const isHealthy = await this.checkDeviceHealth(data.deviceId);
+                this.eventEmitter.emit(`device.${data.deviceId}.health.check.completed`, {
+                    deviceId: data.deviceId,
+                    sessionId: data.sessionId,
+                    healthy: isHealthy,
+                    error: isHealthy ? null : 'Device failed health check'
+                });
+            }
+            catch (error) {
+                this.eventEmitter.emit(`device.${data.deviceId}.health.check.completed`, {
+                    deviceId: data.deviceId,
+                    sessionId: data.sessionId,
+                    healthy: false,
+                    error: error.message
+                });
+            }
+        });
+        this.eventEmitter.on('update.completed', async (data) => {
+            if (data.shouldUpdateDeviceFirmware && data.newFirmwareVersion) {
+                try {
+                    await this.devicesRepository.update({ id: data.deviceId }, { firmwareVersion: data.newFirmwareVersion });
+                    console.log(`Updated device ${data.deviceId} firmware to version ${data.newFirmwareVersion}`);
+                }
+                catch (error) {
+                    console.error(`Failed to update device firmware version:`, error);
+                }
+            }
+        });
+    }
+    async checkDeviceHealth(deviceId) {
+        try {
+            return true;
+        }
+        catch (error) {
+            console.error(`Error checking device health:`, error);
+            return false;
+        }
+    }
 };
 exports.DevicesService = DevicesService;
 exports.DevicesService = DevicesService = DevicesService_1 = __decorate([
@@ -333,6 +395,7 @@ exports.DevicesService = DevicesService = DevicesService_1 = __decorate([
         typeorm_2.Repository,
         websocket_gateway_1.WebsocketGateway,
         analytics_service_1.AnalyticsService,
-        sensors_service_1.SensorsService])
+        sensors_service_1.SensorsService,
+        event_emitter_1.EventEmitter2])
 ], DevicesService);
 //# sourceMappingURL=devices.service.js.map

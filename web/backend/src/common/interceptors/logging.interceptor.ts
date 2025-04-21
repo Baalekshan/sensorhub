@@ -9,10 +9,15 @@ export class LoggingInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const now = Date.now();
-    let request;
-    let operationName;
-    let operationType;
-    let operationDetails;
+    let request: any;
+    let operationName: string;
+    let operationType: string;
+    let operationDetails: {
+      body?: any;
+      params?: any;
+      query?: any;
+      args?: any;
+    };
 
     if (context.getType() === 'http') {
       // Handle REST API requests

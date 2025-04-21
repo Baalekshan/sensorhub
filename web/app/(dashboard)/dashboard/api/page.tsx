@@ -15,7 +15,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { useToast } from '@/hooks/use-toast';
+import useToastNotifications from '@/hooks/use-toast-notifications';
 
 // Mock API key data
 const mockApiKeys = [
@@ -66,7 +66,7 @@ export default function ApiAccessPage() {
   const [visibleKeys, setVisibleKeys] = useState<string[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [newKeyGenerated, setNewKeyGenerated] = useState<string | null>(null);
-  const { toast } = useToast();
+  const { toast } = useToastNotifications();
 
   const toggleKeyVisibility = (id: string) => {
     if (visibleKeys.includes(id)) {

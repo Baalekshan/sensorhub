@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException, ConflictException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, ConflictException, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Device } from './entities/device.entity';
@@ -12,9 +12,10 @@ import { StartStreamDto } from './dto/start-stream.dto';
 import { WebsocketGateway } from '../websocket/websocket.gateway';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { SensorsService } from '../sensors/sensors.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
-export class DevicesService {
+export class DevicesService implements OnModuleInit {
   private readonly logger = new Logger(DevicesService.name);
 
   constructor(
@@ -26,7 +27,8 @@ export class DevicesService {
     private sensorReadingRepository: Repository<SensorReading>,
     private websocketGateway: WebsocketGateway,
     private analyticsService: AnalyticsService,
-    private sensorsService: SensorsService
+    private sensorsService: SensorsService,
+    private eventEmitter: EventEmitter2
   ) {}
 
   async findAll(userId: string): Promise<Device[]> {
@@ -403,6 +405,88 @@ export class DevicesService {
       return readings;
     } catch (error) {
       throw new Error(`Failed to get latest readings: ${error.message}`);
+    }
+  }
+
+  async onModuleInit() {
+    // Listen for device info requests from OTA service
+    this.eventEmitter.on('device.info.requested', async (data: { deviceId: string }) => {
+      try {
+        // Use getDeviceById instead of findOne to avoid requiring userId
+        const device = await this.getDeviceById(data.deviceId);
+        if (device) {
+          // Send device info to whoever requested it
+          this.eventEmitter.emit('device.info.response', {
+            deviceId: device.id,
+            deviceInfo: {
+              id: device.id,
+              // Use a default type if device.type doesn't exist
+              type: device.bluetoothAddress?.split(':')[0] || 'GENERIC',
+              firmwareVersion: device.firmwareVersion || '1.0.0',
+            }
+          });
+        }
+      } catch (error) {
+        console.error(`Error fetching device info for ${data.deviceId}:`, error);
+      }
+    });
+    
+    // Listen for device health check requests
+    this.eventEmitter.on('device.health.check.requested', async (data: { deviceId: string, sessionId: string }) => {
+      try {
+        // Perform health check on device
+        const isHealthy = await this.checkDeviceHealth(data.deviceId);
+        
+        // Send result back
+        this.eventEmitter.emit(`device.${data.deviceId}.health.check.completed`, {
+          deviceId: data.deviceId,
+          sessionId: data.sessionId,
+          healthy: isHealthy,
+          error: isHealthy ? null : 'Device failed health check'
+        });
+      } catch (error) {
+        this.eventEmitter.emit(`device.${data.deviceId}.health.check.completed`, {
+          deviceId: data.deviceId,
+          sessionId: data.sessionId,
+          healthy: false,
+          error: error.message
+        });
+      }
+    });
+    
+    // Listen for firmware update completion events
+    this.eventEmitter.on('update.completed', async (data: { 
+      deviceId: string,
+      shouldUpdateDeviceFirmware: boolean,
+      newFirmwareVersion: string
+    }) => {
+      if (data.shouldUpdateDeviceFirmware && data.newFirmwareVersion) {
+        try {
+          // Update device firmware version in database
+          await this.devicesRepository.update(
+            { id: data.deviceId },
+            { firmwareVersion: data.newFirmwareVersion }
+          );
+          
+          console.log(`Updated device ${data.deviceId} firmware to version ${data.newFirmwareVersion}`);
+        } catch (error) {
+          console.error(`Failed to update device firmware version:`, error);
+        }
+      }
+    });
+  }
+  
+  private async checkDeviceHealth(deviceId: string): Promise<boolean> {
+    try {
+      // In a real implementation, you would:
+      // 1. Get device connection status
+      // 2. Check recent sensor readings
+      // 3. Verify device is responding to messages
+      // For now, return true as a placeholder
+      return true;
+    } catch (error) {
+      console.error(`Error checking device health:`, error);
+      return false;
     }
   }
 }   

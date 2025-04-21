@@ -1,4 +1,10 @@
 import { Sensor } from '../../sensors/entities/sensor.entity';
+export declare enum DeviceStatus {
+    ACTIVE = "ACTIVE",
+    INACTIVE = "INACTIVE",
+    MAINTENANCE = "MAINTENANCE",
+    OFFLINE = "OFFLINE"
+}
 export declare class Device {
     id: string;
     name: string;
@@ -11,4 +17,5 @@ export declare class Device {
     createdAt: Date;
     updatedAt: Date;
     sensors: Sensor[];
+    user: any;
 }

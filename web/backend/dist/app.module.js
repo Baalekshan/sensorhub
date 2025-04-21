@@ -24,6 +24,8 @@ const analytics_module_1 = require("./analytics/analytics.module");
 const common_module_1 = require("./common/common.module");
 const websocket_module_1 = require("./websocket/websocket.module");
 const throttle_guard_1 = require("./common/guards/throttle.guard");
+const communications_module_1 = require("./communications/communications.module");
+const updates_module_1 = require("./updates/updates.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -43,7 +45,7 @@ exports.AppModule = AppModule = __decorate([
                     username: configService.get('POSTGRES_USER'),
                     password: configService.get('POSTGRES_PASSWORD'),
                     database: configService.get('POSTGRES_DB'),
-                    entities: [(0, path_1.join)(__dirname, '**', '*.entity{.ts,.js}')],
+                    entities: [],
                     synchronize: configService.get('NODE_ENV') !== 'production',
                 }),
                 inject: [config_1.ConfigService],
@@ -51,10 +53,12 @@ exports.AppModule = AppModule = __decorate([
             throttler_1.ThrottlerModule.forRootAsync({
                 imports: [config_1.ConfigModule],
                 inject: [config_1.ConfigService],
-                useFactory: (config) => ({
-                    ttl: config.get('THROTTLE_TTL', 60),
-                    limit: config.get('THROTTLE_LIMIT', 100),
-                }),
+                useFactory: (config) => [
+                    {
+                        ttl: config.get('THROTTLE_TTL', 60),
+                        limit: config.get('THROTTLE_LIMIT', 100),
+                    },
+                ],
             }),
             graphql_1.GraphQLModule.forRoot({
                 driver: apollo_1.ApolloDriver,
@@ -93,6 +97,8 @@ exports.AppModule = AppModule = __decorate([
             analytics_module_1.AnalyticsModule,
             common_module_1.CommonModule,
             websocket_module_1.WebsocketModule,
+            communications_module_1.CommunicationsModule,
+            updates_module_1.UpdatesModule,
         ],
         providers: [
             {

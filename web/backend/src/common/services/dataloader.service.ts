@@ -1,6 +1,6 @@
 import { Injectable, Scope } from '@nestjs/common';
 import DataLoader from 'dataloader';
-import { Repository } from 'typeorm';
+import { Repository, ObjectLiteral } from 'typeorm';
 
 @Injectable({ scope: Scope.REQUEST })
 export class DataLoaderService {
@@ -13,7 +13,7 @@ export class DataLoaderService {
    * @param fieldName The name of the field for the dataloader key
    * @returns DataLoader instance
    */
-  createLoader<T>(
+  createLoader<T extends ObjectLiteral>(
     repository: Repository<T>,
     key = 'id' as keyof T,
     fieldName = key as keyof T,
@@ -26,16 +26,16 @@ export class DataLoaderService {
 
     const loader = new DataLoader<any, T>(async (keys: any[]) => {
       // Create a map of field name to key
-      const fieldMap = {};
+      const fieldMap: Record<string | number | symbol, any> = {};
       keys.forEach(key => {
-        fieldMap[fieldName] = key;
+        fieldMap[fieldName as string] = key;
       });
 
       // Find all entities that match any of the keys
       const entities = await repository.find({
         where: keys.map(key => {
-          const where = {};
-          where[fieldName] = key;
+          const where: Record<string | number | symbol, any> = {};
+          where[fieldName as string] = key;
           return where;
         }),
       });
@@ -60,7 +60,7 @@ export class DataLoaderService {
    * @param parentIdField The parent ID field (default: 'id')
    * @returns DataLoader instance
    */
-  createManyToOneLoader<T, K extends keyof T>(
+  createManyToOneLoader<T extends ObjectLiteral, K extends keyof T>(
     repository: Repository<T>,
     foreignKey: K,
     parentIdField = 'id' as any,
@@ -75,8 +75,8 @@ export class DataLoaderService {
       // Find all entities that match the parent IDs
       const entities = await repository.find({
         where: parentIds.map(id => {
-          const where = {};
-          where[foreignKey] = id;
+          const where: Record<string | number | symbol, any> = {};
+          where[foreignKey as string] = id;
           return where;
         }),
       });

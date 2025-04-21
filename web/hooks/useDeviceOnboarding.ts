@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '../components/ui/use-toast';
 import { useRouter } from 'next/navigation';
@@ -339,8 +341,9 @@ export function useDeviceOnboarding() {
           description: `Successfully connected to ${selectedDevice.name}`,
         });
 
-        // Move to the next step
+        // Move to configure step and wait for state update
         setStep('configure');
+
         return true;
       } catch (error) {
         console.error(`Connection attempt ${retryCount + 1} failed:`, error);
@@ -588,60 +591,85 @@ export function useDeviceOnboarding() {
   // Finalize the onboarding process
   const finalizeOnboarding = useCallback(async () => {
     try {
-      // Start streaming data
-      await subscribeLiveData();
-      const streamStarted = await sendCommand('START_STREAMING');
+      console.log('Starting device finalization process...');
       
+      // Validate required data
+      if (!selectedDevice || !selectedProfile || !sensorInfo.length) {
+        throw new Error('Missing required device information');
+      }
+
+      // Start streaming data
+      console.log('Setting up live data stream...');
+      await subscribeLiveData();
+      
+      console.log('Sending START_STREAMING command...');
+      const streamStarted = await sendCommand('START_STREAMING');
       if (!streamStarted) {
         throw new Error('Failed to start data streaming');
       }
 
-      // Register the device with the backend
+      // Prepare device data for registration
+      console.log('Preparing device data for registration...');
       const deviceData = {
-        name: selectedDevice?.name || 'ESP32 Device',
-        bluetoothAddress: selectedDevice?.id || '',
+        name: selectedDevice.name,
+        bluetoothAddress: selectedDevice.id,
         sensors: sensorInfo.length > 0 ? sensorInfo : manualSensorConfig,
         profile: selectedProfile,
       };
 
-      // Register device with backend
+      console.log('Registering device with backend...', deviceData);
       const registrationResult = await registerDevice(deviceData);
       
       if (!registrationResult.success) {
-        throw new Error('Device registration failed');
+        throw new Error('Device registration failed: ' + registrationResult.message);
       }
       
-      // Configure sensors
+      console.log('Device registered successfully:', registrationResult);
+      
+      // Configure sensors with backend
+      console.log('Configuring sensors with backend...');
       await configureSensor(registrationResult.deviceId, deviceData.sensors);
       
       // Start backend stream
+      console.log('Starting backend data stream...');
       await startStream(registrationResult.deviceId);
       
+      console.log('Device setup completed successfully');
       toast({
         title: 'Device Registered',
         description: 'Your device has been successfully registered and is now streaming data.',
       });
       
-      // Disconnect and redirect to the devices page
+      // Disconnect and redirect to devices page
+      console.log('Cleaning up and redirecting...');
       disconnectDevice(false);
-      router.push('/devices');
+      router.push('/dashboard/devices');
     } catch (error) {
       console.error('Finalization error:', error);
+      console.error('Error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      
       toast({
-        title: 'Error',
+        title: 'Setup Failed',
         description: error instanceof Error ? error.message : 'Failed to finalize device setup',
         variant: 'destructive',
       });
+      
+      // Clean up on error
+      disconnectDevice(false);
     }
   }, [
-    subscribeLiveData, 
-    sendCommand, 
-    selectedDevice, 
-    sensorInfo, 
-    manualSensorConfig, 
-    selectedProfile, 
-    disconnectDevice, 
-    router, 
+    selectedDevice,
+    sensorInfo,
+    manualSensorConfig,
+    selectedProfile,
+    subscribeLiveData,
+    sendCommand,
+    disconnectDevice,
+    router,
     toast
   ]);
 
@@ -669,5 +697,6 @@ export function useDeviceOnboarding() {
     finalizeOnboarding,
     calibrateSensors,
     sendCommand,
+    setStep,
   };
 } 

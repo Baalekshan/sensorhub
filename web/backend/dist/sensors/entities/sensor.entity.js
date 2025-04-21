@@ -14,6 +14,7 @@ const typeorm_1 = require("typeorm");
 const graphql_1 = require("@nestjs/graphql");
 const device_entity_1 = require("../../devices/entities/device.entity");
 const sensor_reading_entity_1 = require("./sensor-reading.entity");
+const calibration_record_entity_1 = require("./calibration-record.entity");
 let Sensor = class Sensor {
 };
 exports.Sensor = Sensor;
@@ -73,6 +74,11 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => sensor_reading_entity_1.SensorReading, reading => reading.sensor),
     __metadata("design:type", Array)
 ], Sensor.prototype, "readings", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => [calibration_record_entity_1.CalibrationRecord], { nullable: true }),
+    (0, typeorm_1.OneToMany)(() => calibration_record_entity_1.CalibrationRecord, record => record.sensor),
+    __metadata("design:type", Array)
+], Sensor.prototype, "calibrationRecords", void 0);
 exports.Sensor = Sensor = __decorate([
     (0, graphql_1.ObjectType)(),
     (0, typeorm_1.Entity)('sensors')

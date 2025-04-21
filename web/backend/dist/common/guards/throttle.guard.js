@@ -19,7 +19,7 @@ let GqlThrottlerGuard = class GqlThrottlerGuard extends throttler_1.ThrottlerGua
         }
         return super.getRequestResponse(context);
     }
-    throwThrottlingException() {
+    throwThrottlingException(context, throttlerLimitDetail) {
         throw new throttler_1.ThrottlerException('Too many requests. Please try again later.');
     }
 };

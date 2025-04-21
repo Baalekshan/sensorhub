@@ -1,3 +1,4 @@
+import { OnModuleInit } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Device } from './entities/device.entity';
 import { Sensor } from '../sensors/entities/sensor.entity';
@@ -9,15 +10,17 @@ import { StartStreamDto } from './dto/start-stream.dto';
 import { WebsocketGateway } from '../websocket/websocket.gateway';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { SensorsService } from '../sensors/sensors.service';
-export declare class DevicesService {
+import { EventEmitter2 } from '@nestjs/event-emitter';
+export declare class DevicesService implements OnModuleInit {
     private devicesRepository;
     private sensorsRepository;
     private sensorReadingRepository;
     private websocketGateway;
     private analyticsService;
     private sensorsService;
+    private eventEmitter;
     private readonly logger;
-    constructor(devicesRepository: Repository<Device>, sensorsRepository: Repository<Sensor>, sensorReadingRepository: Repository<SensorReading>, websocketGateway: WebsocketGateway, analyticsService: AnalyticsService, sensorsService: SensorsService);
+    constructor(devicesRepository: Repository<Device>, sensorsRepository: Repository<Sensor>, sensorReadingRepository: Repository<SensorReading>, websocketGateway: WebsocketGateway, analyticsService: AnalyticsService, sensorsService: SensorsService, eventEmitter: EventEmitter2);
     findAll(userId: string): Promise<Device[]>;
     findOne(id: string, userId: string): Promise<Device>;
     create(createDeviceInput: CreateDeviceInput & {
@@ -52,4 +55,6 @@ export declare class DevicesService {
         sensor: Sensor;
         readings: SensorReading[];
     }[]>;
+    onModuleInit(): Promise<void>;
+    private checkDeviceHealth;
 }

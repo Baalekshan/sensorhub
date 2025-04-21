@@ -17,7 +17,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/hooks/use-toast';
+import useToastNotifications from '@/hooks/use-toast-notifications';
 import { useAuth } from '@/context/auth-context';
 
 const signupSchema = z.object({
@@ -32,7 +32,7 @@ const signupSchema = z.object({
 
 export default function SignupPage() {
   const router = useRouter();
-  const { toast } = useToast();
+  const { toast } = useToastNotifications();
   const { signup, loginWithProvider, isLoading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   

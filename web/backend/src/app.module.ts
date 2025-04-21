@@ -4,7 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule, ThrottlerModuleOptions } from '@nestjs/throttler';
+import { Request } from 'express';
 
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -16,6 +17,8 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { CommonModule } from './common/common.module';
 import { WebsocketModule } from './websocket/websocket.module';
 import { GqlThrottlerGuard } from './common/guards/throttle.guard';
+import { CommunicationsModule } from './communications/communications.module';
+import { UpdatesModule } from './updates/updates.module';
 
 @Module({
   imports: [
@@ -32,7 +35,7 @@ import { GqlThrottlerGuard } from './common/guards/throttle.guard';
         username: configService.get('POSTGRES_USER'),
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DB'),
-        entities: [join(__dirname, '**', '*.entity{.ts,.js}')],
+        entities: [],
         synchronize: configService.get('NODE_ENV') !== 'production',
       }),
       inject: [ConfigService],
@@ -40,10 +43,12 @@ import { GqlThrottlerGuard } from './common/guards/throttle.guard';
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        ttl: config.get('THROTTLE_TTL', 60),
-        limit: config.get('THROTTLE_LIMIT', 100),
-      }),
+      useFactory: (config: ConfigService) => [
+        {
+          ttl: config.get<number>('THROTTLE_TTL', 60),
+          limit: config.get<number>('THROTTLE_LIMIT', 100),
+        },
+      ],
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
@@ -56,8 +61,9 @@ import { GqlThrottlerGuard } from './common/guards/throttle.guard';
           path: '/graphql',
           onConnect: (context) => {
             const { connectionParams, extra } = context;
-            // Auth logic can be placed here for subscription connections
+            // @ts-ignore
             if (connectionParams?.authorization) {
+              // @ts-ignore
               extra.authorization = connectionParams.authorization;
             }
             return true;
@@ -65,7 +71,7 @@ import { GqlThrottlerGuard } from './common/guards/throttle.guard';
         },
         'subscriptions-transport-ws': true,
       },
-      context: ({ req, connection }) => {
+      context: ({ req, connection }: { req?: Request; connection?: any }) => {
         // For queries and mutations
         if (req) {
           return { req };
@@ -85,6 +91,8 @@ import { GqlThrottlerGuard } from './common/guards/throttle.guard';
     AnalyticsModule,
     CommonModule,
     WebsocketModule,
+    CommunicationsModule,
+    UpdatesModule,
   ],
   providers: [
     {

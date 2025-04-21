@@ -1,36 +1,29 @@
-import { InputType, Field } from '@nestjs/graphql';
-import { IsNotEmpty, IsString, IsOptional, IsEnum } from 'class-validator';
+import { Field, InputType } from '@nestjs/graphql';
+import { IsString, IsOptional, IsEnum, IsUUID } from 'class-validator';
 import { DeviceStatus } from '../entities/device.entity';
 
 @InputType()
 export class CreateDeviceInput {
   @Field()
-  @IsNotEmpty()
   @IsString()
   name: string;
 
-  @Field({ nullable: true })
-  @IsOptional()
+  @Field()
   @IsString()
-  location?: string;
+  bluetoothAddress: string;
 
   @Field({ nullable: true })
-  @IsOptional()
-  @IsEnum(DeviceStatus)
-  status?: DeviceStatus;
-
-  @Field({ nullable: true })
-  @IsOptional()
   @IsString()
+  @IsOptional()
   firmwareVersion?: string;
 
   @Field({ nullable: true })
+  @IsEnum(DeviceStatus)
   @IsOptional()
-  @IsString()
-  macAddress?: string;
+  status?: DeviceStatus;
 
   @Field({ nullable: true })
+  @IsUUID()
   @IsOptional()
-  @IsString()
-  ipAddress?: string;
+  userId?: string;
 } 

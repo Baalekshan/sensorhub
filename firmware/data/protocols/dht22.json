@@ -1,0 +1,127 @@
+{
+    "protocol": {
+        "name": "DHT22",
+        "version": "1.0",
+        "manufacturer": "Aosong",
+        "description": "Digital temperature and humidity sensor",
+        
+        "communication": {
+            "busType": "gpio_digital",
+            "timing": {
+                "startSignalLowMs": 1,
+                "startSignalHighUs": 30,
+                "bitTimeoutUs": 100,
+                "bitThresholdUs": 28,
+                "minSamplingPeriodMs": 2000
+            },
+            "dataFormat": {
+                "totalBits": 40,
+                "hasCRC": true,
+                "usePullup": true
+            }
+        },
+        
+        "capabilities": {
+            "sensorTypes": ["temperature", "humidity"],
+            "supports": {
+                "sleep": false,
+                "interrupt": false,
+                "multiSampling": false,
+                "variableSamplingRate": false
+            },
+            "powerConsumption": {
+                "active": 1.5,
+                "sleep": 0.0,
+                "unit": "mA"
+            }
+        },
+        
+        "dataFormat": {
+            "fields": [
+                {
+                    "name": "humidity",
+                    "startBit": 0,
+                    "length": 16,
+                    "scaling": 0.1,
+                    "unit": "%",
+                    "description": "Relative humidity"
+                },
+                {
+                    "name": "temperature",
+                    "startBit": 16,
+                    "length": 16,
+                    "scaling": 0.1,
+                    "unit": "°C",
+                    "description": "Temperature"
+                },
+                {
+                    "name": "checksum",
+                    "startBit": 32,
+                    "length": 8,
+                    "type": "crc8",
+                    "description": "CRC-8 checksum"
+                }
+            ]
+        },
+        
+        "calibration": {
+            "methods": ["linear", "point"],
+            "parameters": [
+                {
+                    "name": "tempOffset",
+                    "defaultValue": 0.0,
+                    "min": -10.0,
+                    "max": 10.0,
+                    "description": "Temperature offset correction"
+                },
+                {
+                    "name": "tempScale",
+                    "defaultValue": 1.0,
+                    "min": 0.5,
+                    "max": 1.5,
+                    "description": "Temperature scaling factor"
+                },
+                {
+                    "name": "humidityOffset",
+                    "defaultValue": 0.0,
+                    "min": -10.0,
+                    "max": 10.0,
+                    "description": "Humidity offset correction"
+                },
+                {
+                    "name": "humidityScale",
+                    "defaultValue": 1.0,
+                    "min": 0.5,
+                    "max": 1.5,
+                    "description": "Humidity scaling factor"
+                }
+            ]
+        },
+        
+        "discovery": {
+            "supportsAutoDetection": false,
+            "detectionMethod": "manual",
+            "uniqueIdentifiers": []
+        },
+        
+        "configuration": {
+            "pinAssignment": {
+                "type": "gpio",
+                "required": true,
+                "description": "Data pin for DHT22"
+            }
+        },
+        
+        "examples": {
+            "pinAssignment": {
+                "pin": 4
+            },
+            "calibration": {
+                "tempOffset": -1.2,
+                "tempScale": 1.03,
+                "humidityOffset": 2.0,
+                "humidityScale": 0.98
+            }
+        }
+    }
+} 

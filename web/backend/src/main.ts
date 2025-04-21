@@ -8,7 +8,8 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { GqlThrottlerGuard } from './common/guards/throttle.guard';
 import helmet from 'helmet';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { graphqlUploadExpress } from 'graphql-upload';
+// @ts-ignore
+import { graphqlUploadExpress } from 'graphql-upload-minimal';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);

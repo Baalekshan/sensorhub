@@ -10,14 +10,14 @@ export declare class HealthController {
             error?: undefined;
         } | {
             status: string;
-            error: any;
+            error: string;
         };
         redis: {
             status: string;
             error?: undefined;
         } | {
             status: string;
-            error: any;
+            error: string;
         };
         uptime: number;
         memoryUsage: NodeJS.MemoryUsage;

@@ -33,10 +33,10 @@ export class HealthService {
       // Simple query to check DB connection
       await this.userRepository.query('SELECT 1');
       return { status: 'up' };
-    } catch (error) {
+    } catch (error: unknown) {
       return {
         status: 'down',
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -48,10 +48,10 @@ export class HealthService {
       return {
         status: pong === 'PONG' ? 'up' : 'down',
       };
-    } catch (error) {
+    } catch (error: unknown) {
       return {
         status: 'down',
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }

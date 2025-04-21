@@ -1,0 +1,32 @@
+import { Repository } from 'typeorm';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Firmware } from '../entities/firmware.entity';
+import { UpdateSession } from '../entities/update-session.entity';
+import { DeviceCommunicationService } from '../services/device-communication.service';
+import { UpdateOptions, UpdateStatusReport, DeviceInfo } from './update.types';
+export declare class OTAUpdateService {
+    private deviceCommunicationService;
+    private firmwareRepository;
+    private updateSessionRepository;
+    private eventEmitter;
+    private readonly DEFAULT_CHUNK_SIZE;
+    constructor(deviceCommunicationService: DeviceCommunicationService, firmwareRepository: Repository<Firmware>, updateSessionRepository: Repository<UpdateSession>, eventEmitter: EventEmitter2);
+    startFirmwareUpdate(deviceInfo: DeviceInfo, firmwareId: string, options?: UpdateOptions): Promise<UpdateSession>;
+    private startUpdateProcess;
+    private continueWithTransfer;
+    private sendNextChunk;
+    private finalizeUpdate;
+    processUpdateStatusReport(deviceId: string, statusReport: UpdateStatusReport): Promise<void>;
+    private handleChunkReceived;
+    private completeUpdate;
+    private verifyDeviceHealth;
+    private handleUpdateVerificationFailure;
+    private handleUpdateFailure;
+    private handleUpdateError;
+    private updateSessionStatus;
+    private updateSessionProgress;
+    private getChunkData;
+    private calculateChecksum;
+    private isCompatible;
+    private estimateUpdateDuration;
+}

@@ -24,6 +24,6 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
     }),
   ],
   providers: [AuthService, JwtStrategy, JwtRefreshStrategy, AuthResolver],
-  exports: [AuthService],
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule {} 

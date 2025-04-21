@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useToast } from '@/hooks/use-toast';
+import useToastNotifications from '@/hooks/use-toast-notifications';
 
 // Mock data for devices
 const mockDevices = [
@@ -68,7 +68,7 @@ const mockDevices = [
 export default function DevicesPage() {
   const [devices, setDevices] = useState(mockDevices);
   const [search, setSearch] = useState('');
-  const { toast } = useToast();
+  const { toast } = useToastNotifications();
 
   const filteredDevices = devices.filter(device => 
     device.name.toLowerCase().includes(search.toLowerCase()) ||

@@ -1,0 +1,305 @@
+{
+    "protocol": {
+        "name": "IndustrialTempSensor",
+        "version": "1.0",
+        "manufacturer": "Industrial Sensors Ltd.",
+        "description": "High-precision industrial temperature sensor with extended range",
+        
+        "communication": {
+            "busType": "i2c",
+            "i2c": {
+                "defaultAddress": "0x48",
+                "alternativeAddresses": ["0x49", "0x4A", "0x4B"],
+                "clockSpeed": 100000,
+                "addressBits": 7,
+                "timeout": 1000
+            }
+        },
+        
+        "capabilities": {
+            "sensorTypes": ["temperature"],
+            "temperatureRange": {
+                "min": -100.0,
+                "max": 400.0,
+                "unit": "°C"
+            },
+            "accuracy": {
+                "value": 0.1,
+                "unit": "°C"
+            },
+            "resolution": {
+                "value": 0.01,
+                "unit": "°C"
+            },
+            "supports": {
+                "sleep": true,
+                "interrupt": true,
+                "multiSampling": true,
+                "variableSamplingRate": true,
+                "alarms": true
+            },
+            "powerConsumption": {
+                "active": 0.5,
+                "sleep": 0.01,
+                "unit": "mA"
+            }
+        },
+        
+        "registers": {
+            "temperature": {
+                "address": "0x00",
+                "length": 2,
+                "access": "read",
+                "description": "Temperature register (16-bit signed value, LSB = 0.01°C)"
+            },
+            "configuration": {
+                "address": "0x01",
+                "length": 1,
+                "access": "read/write",
+                "description": "Configuration register",
+                "bits": [
+                    {
+                        "bit": 0,
+                        "name": "enable",
+                        "description": "Sensor enable (1 = enabled, 0 = disabled)"
+                    },
+                    {
+                        "bit": 1,
+                        "name": "sleep",
+                        "description": "Sleep mode (1 = sleep, 0 = active)"
+                    },
+                    {
+                        "bit": "2-3",
+                        "name": "resolution",
+                        "description": "Resolution setting (00 = 12-bit, 01 = 13-bit, 10 = 14-bit, 11 = 15-bit)"
+                    },
+                    {
+                        "bit": "4-5",
+                        "name": "sampleRate",
+                        "description": "Sample rate (00 = 1Hz, 01 = 4Hz, 10 = 8Hz, 11 = 16Hz)"
+                    },
+                    {
+                        "bit": 6,
+                        "name": "alarmEnable",
+                        "description": "Alarm enable (1 = enabled, 0 = disabled)"
+                    },
+                    {
+                        "bit": 7,
+                        "name": "interruptEnable",
+                        "description": "Interrupt enable (1 = enabled, 0 = disabled)"
+                    }
+                ]
+            },
+            "highLimit": {
+                "address": "0x02",
+                "length": 2,
+                "access": "read/write",
+                "description": "High temperature limit (16-bit signed value, LSB = 0.01°C)"
+            },
+            "lowLimit": {
+                "address": "0x03",
+                "length": 2,
+                "access": "read/write",
+                "description": "Low temperature limit (16-bit signed value, LSB = 0.01°C)"
+            },
+            "status": {
+                "address": "0x04",
+                "length": 1,
+                "access": "read",
+                "description": "Status register",
+                "bits": [
+                    {
+                        "bit": 0,
+                        "name": "busy",
+                        "description": "Busy flag (1 = busy, 0 = ready)"
+                    },
+                    {
+                        "bit": 1,
+                        "name": "highAlarm",
+                        "description": "High alarm flag (1 = alarm, 0 = no alarm)"
+                    },
+                    {
+                        "bit": 2,
+                        "name": "lowAlarm",
+                        "description": "Low alarm flag (1 = alarm, 0 = no alarm)"
+                    },
+                    {
+                        "bit": 3,
+                        "name": "sensorError",
+                        "description": "Sensor error flag (1 = error, 0 = normal)"
+                    }
+                ]
+            },
+            "deviceId": {
+                "address": "0xFE",
+                "length": 1,
+                "access": "read",
+                "description": "Device ID register (0x55 for this sensor)"
+            },
+            "reset": {
+                "address": "0xFF",
+                "length": 1,
+                "access": "write",
+                "description": "Reset register (write 0xA5 to reset)"
+            }
+        },
+        
+        "dataFormat": {
+            "fields": [
+                {
+                    "name": "temperature",
+                    "register": "0x00",
+                    "length": 16,
+                    "type": "int16",
+                    "scaling": 0.01,
+                    "unit": "°C",
+                    "description": "Temperature reading"
+                }
+            ],
+            "conversion": {
+                "dataType": "int16",
+                "operation": "multiply",
+                "factor": 0.01
+            }
+        },
+        
+        "calibration": {
+            "methods": ["linear", "polynomial", "point"],
+            "parameters": [
+                {
+                    "name": "offset",
+                    "defaultValue": 0.0,
+                    "min": -5.0,
+                    "max": 5.0,
+                    "description": "Temperature offset correction"
+                },
+                {
+                    "name": "scale",
+                    "defaultValue": 1.0,
+                    "min": 0.9,
+                    "max": 1.1,
+                    "description": "Temperature scaling factor"
+                }
+            ],
+            "polynomialParams": {
+                "maxDegree": 3,
+                "defaultCoefficients": [0.0, 1.0, 0.0, 0.0]
+            }
+        },
+        
+        "discovery": {
+            "supportsAutoDetection": true,
+            "detectionMethod": "i2c",
+            "uniqueIdentifiers": [
+                {
+                    "register": "0xFE",
+                    "value": "0x55"
+                }
+            ],
+            "detectionSequence": [
+                {
+                    "type": "read",
+                    "register": "0xFE",
+                    "expectedValue": "0x55"
+                }
+            ]
+        },
+        
+        "configuration": {
+            "i2cAddress": {
+                "type": "select",
+                "options": ["0x48", "0x49", "0x4A", "0x4B"],
+                "default": "0x48",
+                "required": true,
+                "description": "I2C address of the sensor"
+            },
+            "resolution": {
+                "type": "select",
+                "options": ["12-bit", "13-bit", "14-bit", "15-bit"],
+                "default": "14-bit",
+                "required": false,
+                "description": "ADC resolution"
+            },
+            "sampleRate": {
+                "type": "select",
+                "options": ["1Hz", "4Hz", "8Hz", "16Hz"],
+                "default": "4Hz",
+                "required": false,
+                "description": "Sample rate"
+            },
+            "alarmEnable": {
+                "type": "boolean",
+                "default": false,
+                "required": false,
+                "description": "Enable temperature alarms"
+            },
+            "highLimit": {
+                "type": "number",
+                "min": -100.0,
+                "max": 400.0,
+                "default": 100.0,
+                "required": false,
+                "description": "High temperature alarm limit (°C)"
+            },
+            "lowLimit": {
+                "type": "number",
+                "min": -100.0,
+                "max": 400.0,
+                "default": 0.0,
+                "required": false,
+                "description": "Low temperature alarm limit (°C)"
+            },
+            "interruptPin": {
+                "type": "gpio",
+                "required": false,
+                "description": "GPIO pin for interrupt signal"
+            }
+        },
+        
+        "initSequence": [
+            {
+                "type": "write",
+                "register": "0xFF",
+                "value": "0xA5",
+                "description": "Reset sensor"
+            },
+            {
+                "type": "delay",
+                "value": 10,
+                "description": "Wait for reset to complete"
+            },
+            {
+                "type": "read",
+                "register": "0xFE",
+                "expectedValue": "0x55",
+                "description": "Verify device ID"
+            },
+            {
+                "type": "write",
+                "register": "0x01",
+                "value": "0x01",
+                "description": "Enable sensor in default configuration"
+            }
+        ],
+        
+        "examples": {
+            "i2cConfiguration": {
+                "address": "0x48",
+                "sdaPin": 21,
+                "sclPin": 22
+            },
+            "sensorConfiguration": {
+                "resolution": "14-bit",
+                "sampleRate": "4Hz",
+                "alarmEnable": true,
+                "highLimit": 80.0,
+                "lowLimit": 10.0,
+                "interruptPin": 5
+            },
+            "calibration": {
+                "offset": -0.5,
+                "scale": 1.02
+            }
+        }
+    }
+} 
